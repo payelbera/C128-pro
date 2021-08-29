@@ -1,70 +1,43 @@
-from selenium import webdriver
-from bs4 import BeautifulSoup
-import csv
-import time
+from bs4 import BeautifulSoup as bs
 import requests
 import pandas as pd
 
-starturl = "https://en.wikipedia.org/wiki/List_of_brown_dwarfs"
 
-page = requests.get(starturl)
+url = 'https://en.wikipedia.org/wiki/List_of_brown_dwarfs'
 
-time.sleep(1)
+page = requests.get(url)
+print(page)
 
+soup = bs(page.text,'html.parser')
 
-def scrape():
-    soup = BeautifulSoup(page.text, "html.parser")
-
-    startable = soup.find('table')
-    print(len(startable))
-
-    templist = []
-
-    tablerows = startable[1].find_all("tr")
-
-    for tr in tablerows:
-        td = tr.find_all("td")
-
-        row = [i.text.rstrip()for i in td]
-
-        templist.append(row)
-
-    star = []
-    Constellation = []
-    Rightascension = []
-    Declination = []
-    Appmag = []
-    Distance = []
-    Spectraltype = []
-    Browndwarf = []
-    Mass = []
-    Radius = []
-    Orbitalperiod = []
-    Semimajoraxis = []
-    Ecc = []
-    Discoveryyear = []
-
-    for i in range(1, len(templist)):
-
-        star.append(templist[i][0])
-        Constellation.append(templist[i][1])
-        Rightascension.append(templist[i][2])
-        Declination.append(templist[i][3])
-        Appmag.append(templist[i][4])
-        Distance.append(templist[i][5])
-        Spectraltype.append(templist[i][6])
-        Browndwarf.append(templist[i][7])
-        Mass.append(templist[i][8])
-        Radius.append(templist[i][9])
-        Orbitalperiod.append(templist[i][10])
-        Semimajoraxis.append(templist[i][11])
-        Ecc.append(templist[i][12])
-        Discoveryyear.append(templist[i][13])
-
-    df = pd.DataFrame(list(zip(star, Constellation, Rightascension, Declination, Appmag, Distance, Spectraltype, Browndwarf, Mass, Radius, Orbitalperiod, Semimajoraxis, Ecc, Discoveryyear)), columns=[
-                      "Star", "Constellation", "Rightascension", "Declination", "App.mag.", "Distance(ly)", "Spectraltype", "Brown dwarf", "Mass(MJ)", "Radius(RJ)", "Orbitalperiod(d)", "Semimajoraxis(AU)", "Ecc.", "Discoveryyear"])
-
-    df.to_csv("stars.csv")
+star_table = soup.find_all('table')
+print(len(star_table))
 
 
-scrape()
+temp_list= []
+table_rows = star_table[3].find_all('tr')
+for tr in table_rows:
+    td = tr.find_all('td')
+    row = [i.text.rstrip() for i in td]
+    temp_list.append(row)
+print(temp_list)
+
+
+
+Star_names = []
+Distance =[]
+Mass = []
+Radius =[]
+
+
+for i in range(1,len(temp_list)):
+    
+    Star_names.append(temp_list[i][0])
+    Distance.append(temp_list[i][5])
+    Mass.append(temp_list[i][7])
+    Radius.append(temp_list[i][8])
+
+df2 = pd.DataFrame(list(zip(Star_names,Distance,Mass,Radius,)),columns=['Star_name','Distance','Mass','Radius'])
+print(df2)
+
+df2.to_csv('dwarf_stars.csv')
